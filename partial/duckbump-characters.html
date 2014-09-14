@@ -1,0 +1,20 @@
+<section>
+	<h3>Characters of Duckbump</h3>
+	<div class='duckbump-character-list'>
+		<div class="row duckbump-character" ng-repeat="character in charactersCtrl.characters">
+			<div class="col-xs-2 duckbump-character-img">
+				<img ng-src="{{character.imageUrl}}"/>
+			</div>
+			<div class="col-xs-10 duckbump-character-about">
+				<div class="duckbump-character-item">
+					<p class="inline duckbump-label">Name:</p>
+					<p class="inline">{{character.name}}</p>
+				</div>
+				<div class="duckbump-character-item">
+					<p class="inline duckbump-label">Description: </p>
+					<p class="inline">{{character.description}}</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
