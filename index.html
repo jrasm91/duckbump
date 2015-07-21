@@ -9,16 +9,41 @@
 	<script src="bower_components/bootstrap/dist//js/bootstrap.js"></script>
 	<script src="bower_components/angular/angular.js"></script> -->
 	<script src="dist/jquery.min.js"></script>
-	<script src="dist/bootstrap.min.js"></script>
+	<!-- // <script src="dist/bootstrap.min.js"></script> -->
 	<script src="dist/angular.min.js"></script>
+	<script src="dist/angular-route.min.js"></script>
 	<script src="js/duckbumpApp.js"></script>
 	
 	<!-- <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css"> -->
 	<link rel="stylesheet" href="dist/bootstrap.min.css">
 	<link rel="stylesheet" href="css/index.css">
 </head>
-<body ng-app='duckbumpApp'>
+<body ng-app='duckbumpApp' ng-controller="MainController as mainCtrl">
 	<div class="container">
-		<duckbump-tabs ></duckbump-tabs>
+		<div class="duckbump-header">
+			<h1 class="duckbump-brand">DuckBump</h1>
+			<ul class="nav duckbump-nav">
+				<li ng-class="{ active:mainCtrl.isActive(mainCtrl.tabs.HOME) }"><a href="#/home">Home</a></li>
+				<li ng-class="{ active:mainCtrl.isActive(mainCtrl.tabs.PLAY) }"><a href="#/play">Play</a></li>
+				<li ng-class="{ active:mainCtrl.isActive(mainCtrl.tabs.HOW_TO_PLAY) }"><a href="#/how-to-play">How To Play</a></li>
+				<li ng-class="{ active:mainCtrl.isActive(mainCtrl.tabs.CHARACTERS) }"><a href="#/characters">Characters</a></li>
+				<li ng-class="{ active:mainCtrl.isActive(mainCtrl.tabs.ABOUT) }"><a href="#/about">About</a></li>
+			</ul>
+		</div>
+		<div>
+			<h3>{{ mainCtrl.getActiveTab().title }} </h3>
+			<h4>{{ mainCtrl.getActiveTab().title2 }} </h4>
+			<div ng-view>Loading...</div>
+		</div>
+		<div class="duckbump-footer">
+			<p>Game created by <a href="https://plus.google.com/113147628014887499425/">Jonathan Southworth</a></p>
+			<p>Webpage created by <a href="http://github.com/jrasm91">Jason Rasmussen</a></p>
+		</div>
+		<div style="clear: both"></div>
 	</div>
+	<script src="dist/phaser-arcade-physics.min.js"></script>
+	<script src="js/boot.js"></script>
+	<script src="js/preloader.js"></script>
+	<script src="js/mainMenu.js"></script>
+	<script src="js/game.js"></script>
 </body>
