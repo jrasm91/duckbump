@@ -154,7 +154,8 @@ h3 {
 }
 
 .duckbump-text {
-	color: #9D6533;
+	/*color: #000;*/
+	color: rgba(255,255,255,.75);
 }
 
 .inline {
