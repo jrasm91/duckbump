@@ -4,8 +4,8 @@ DuckbumpGame.Game = function (game) {
 
 DuckbumpGame.Game.prototype = {
   preload: function () {
-    // this.load.image('sea', 'assets/sea.png');
-    this.load.image('sea', 'img/DuckBumpBackground.jpg');
+    // this.load.image('background', 'assets/sea.png');
+    this.load.image('background', 'img/DuckBumpBackground.jpg');
 
     this.load.spritesheet('bullet', 'img/whirlie_sprite.png', 14, 24);
 
@@ -28,16 +28,16 @@ DuckbumpGame.Game.prototype = {
   },
 
   setupBackground: function () {
-    this.sea = this.add.sprite(0, 0, 'sea');
-    this.sea.width = this.game.width;
-    this.sea.height = this.game.height;
-    // this.sea.autoScroll(-DuckbumpGame.SEA_SCROLL_SPEED, 0);
+    this.background = this.add.sprite(0, 0, 'background');
+    this.background.width = this.game.width;
+    this.background.height = this.game.height;
+    // this.background.autoScroll(-DuckbumpGame.background, 0);
   },
 
   setupPlayer: function () {
     this.player = this.add.sprite(this.game.width / 2, this.game.height - 50, 'player');
     this.player.anchor.setTo(0.5, 0.5);
-    this.player.scale = { x:.8, y:.8};
+    this.player.scale.setTo(.8, .8);
 
     // this.player.animations.add('fly', [0, 1, 2], 20, true);
     // this.player.animations.add('ghost', [3, 0, 3, 1], 20, true);
@@ -102,10 +102,10 @@ DuckbumpGame.Game.prototype = {
   setupPlayerIcons: function () {
     this.lives = this.add.group();
     // calculate location of first life icon
-    var firstLifeIconX = this.game.width - 10 - (DuckbumpGame.PLAYER_EXTRA_LIVES * 30);
+    var firstLifeIconX = this.game.width - 10 - (DuckbumpGame.PLAYER_EXTRA_LIVES * 20);
     for (var i = 0; i < DuckbumpGame.PLAYER_EXTRA_LIVES; i++) {
-      var life = this.lives.create(firstLifeIconX + (30 * i), 30, 'player');
-      life.scale.setTo(0.5, 0.5);
+      var life = this.lives.create(firstLifeIconX + (20 * i), 20, 'player');
+      life.scale.setTo(0.4, 0.4);
       life.anchor.setTo(0.5, 0.5);
     }
   },
@@ -125,7 +125,7 @@ DuckbumpGame.Game.prototype = {
     this.scoreText = this.add.text(
       this.game.width / 2, 30, '' + this.score, {
         font: '20px pixalFont',
-        fill: '#fff',
+        fill: '#7D4513',
         align: 'center'
       }
       );
