@@ -6,5 +6,5 @@ game.state.add('MainMenu', DuckbumpGame.MainMenu);
 game.state.add('Game', DuckbumpGame.Game);
 
 //  Now start the Boot state.
-// game.state.start('Boot');
-game.state.start('Game');
+game.state.start('Boot');
+// game.state.start('Game');
