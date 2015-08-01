@@ -16,12 +16,6 @@ DuckbumpGame.MainMenu.prototype = {
       fill: "#fff"
     });
     this.loadingText.anchor.setTo(0.5, 0.5);
-    // this.game.input.keyboard.onDownCallback = function (e) {
-    //   console.log(e);
-    //   this.game.input.keyboard.onDownCallback = null;
-    //   DuckbumpGame.MainMenu.prototype.startGame(this.game);
-
-    // };
   },
 
   update: function () {
@@ -30,7 +24,6 @@ DuckbumpGame.MainMenu.prototype = {
     }
   },
   startGame: function (game) {
-    console.log(this);
     game.state.start('Game');
   }
 };

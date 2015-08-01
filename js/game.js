@@ -4,7 +4,9 @@ DuckbumpGame.Game = function (game) {
 
 DuckbumpGame.Game.prototype = {
   preload: function () {
-    this.load.image('sea', 'assets/sea.png');
+    // this.load.image('sea', 'assets/sea.png');
+    this.load.image('sea', 'img/DuckBumpBackground.jpg');
+
     this.load.spritesheet('bullet', 'img/whirlie_sprite.png', 14, 24);
 
     this.load.spritesheet('greenEnemy', 'img/green_sprite.png', 48, 24, 2);
@@ -26,13 +28,17 @@ DuckbumpGame.Game.prototype = {
   },
 
   setupBackground: function () {
-    this.sea = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'sea');
-    this.sea.autoScroll(-DuckbumpGame.SEA_SCROLL_SPEED, 0);
+    this.sea = this.add.sprite(0, 0, 'sea');
+    this.sea.width = this.game.width;
+    this.sea.height = this.game.height;
+    // this.sea.autoScroll(-DuckbumpGame.SEA_SCROLL_SPEED, 0);
   },
 
   setupPlayer: function () {
     this.player = this.add.sprite(this.game.width / 2, this.game.height - 50, 'player');
     this.player.anchor.setTo(0.5, 0.5);
+    this.player.scale = { x:.8, y:.8};
+
     // this.player.animations.add('fly', [0, 1, 2], 20, true);
     // this.player.animations.add('ghost', [3, 0, 3, 1], 20, true);
     // this.player.play('fly');
@@ -114,7 +120,7 @@ DuckbumpGame.Game.prototype = {
       }
       );
     this.instructions.anchor.setTo(0.5, 0.5);
-    this.instExpire = this.time.now + DuckbumpGame.INSTRUCTION_EXPIRE;
+    this.instExpire = this.time.now;//DuckbumpGame.INSTRUCTION_EXPIRE;
     this.score = 0;
     this.scoreText = this.add.text(
       this.game.width / 2, 30, '' + this.score, {
@@ -254,7 +260,7 @@ processDelayedEffects: function () {
     //   bullet.reset(this.player.x + (10 + i * 6), this.player.y - 20);
     //   // the right bullets spread from -85 degrees to -45
     //   this.physics.arcade.velocityFromAngle(-85 + i * 10, DuckbumpGame.BULLET_VELOCITY, bullet.body.velocity);
-    
+
     //   bullet.play('twirl');
     // }
     var bullet = this.bulletPool.getFirstExists(false);
