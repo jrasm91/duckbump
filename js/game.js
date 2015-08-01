@@ -4,12 +4,10 @@ DuckbumpGame.Game = function (game) {
 
 DuckbumpGame.Game.prototype = {
   preload: function () {
-    // this.load.image('background', 'assets/sea.png');
     this.load.image('background', 'img/DuckBumpBackground.jpg');
-
-    this.load.spritesheet('bullet', 'img/whirlie_sprite.png', 14, 24);
-
-    this.load.spritesheet('greenEnemy', 'img/green_sprite.png', 48, 24, 2);
+    this.load.spritesheet('whirlie', 'img/whirlie_sprite.png', 14, 24);
+    this.load.spritesheet('greenDuck', 'img/green_sprite.png', 48, 24, 2);
+    // this.load.spritesheet('goldDuck', 'img/gold_sprite.png', 48, 24, 2);
     this.load.spritesheet('explosion', 'assets/explosion.png', 32, 32);
     this.load.image('player', 'img/DuckBumpJones.png')
   },
@@ -17,8 +15,8 @@ DuckbumpGame.Game.prototype = {
   create: function () {
     this.setupBackground();
     this.setupPlayer();
-    this.setupEnemies();
-    this.setupBullets();
+    this.setupDucks();
+    this.setupWhirlies();
     this.setupExplosions();
     this.setupText();
     this.setupPlayerIcons();
@@ -31,14 +29,12 @@ DuckbumpGame.Game.prototype = {
     this.background = this.add.sprite(0, 0, 'background');
     this.background.width = this.game.width;
     this.background.height = this.game.height;
-    // this.background.autoScroll(-DuckbumpGame.background, 0);
   },
 
   setupPlayer: function () {
     this.player = this.add.sprite(this.game.width / 2, this.game.height - 50, 'player');
     this.player.anchor.setTo(0.5, 0.5);
     this.player.scale.setTo(.8, .8);
-
     // this.player.animations.add('fly', [0, 1, 2], 20, true);
     // this.player.animations.add('ghost', [3, 0, 3, 1], 20, true);
     // this.player.play('fly');
@@ -48,40 +44,40 @@ DuckbumpGame.Game.prototype = {
     this.player.body.setSize(20, 20, 0, -5);
   },
 
-  setupEnemies: function () {
-    this.enemyPool = this.add.group();
-    this.enemyPool.enableBody = true;
-    this.enemyPool.physicsBodyType = Phaser.Physics.ARCADE;
-    this.enemyPool.createMultiple(50, 'greenEnemy');
-    this.enemyPool.setAll('anchor.x', 0.5);
-    this.enemyPool.setAll('anchor.y', 0.5);
-    this.enemyPool.setAll('outOfBoundsKill', true);
-    this.enemyPool.setAll('checkWorldBounds', true);
-    this.enemyPool.setAll('reward', DuckbumpGame.ENEMY_REWARD, false, false, 0, true);
-    this.enemyPool.forEach(function (enemy) {
-      enemy.animations.add('fly', [0, 1, 0, 1], 20, true);
-      enemy.animations.add('hit', [0, 1, 0, 1], 20, false);
-      enemy.events.onAnimationComplete.add(function (e) {
+  setupDucks: function () {
+    this.dreenDuckPool = this.add.group();
+    this.dreenDuckPool.enableBody = true;
+    this.dreenDuckPool.physicsBodyType = Phaser.Physics.ARCADE;
+    this.dreenDuckPool.createMultiple(50, 'greenDuck');
+    this.dreenDuckPool.setAll('anchor.x', 0.5);
+    this.dreenDuckPool.setAll('anchor.y', 0.5);
+    this.dreenDuckPool.setAll('outOfBoundsKill', true);
+    this.dreenDuckPool.setAll('checkWorldBounds', true);
+    this.dreenDuckPool.setAll('reward', DuckbumpGame.ENEMY_REWARD, false, false, 0, true);
+    this.dreenDuckPool.forEach(function (duck) {
+      duck.animations.add('fly', [0, 1, 0, 1], 20, true);
+      duck.animations.add('hit', [0, 1, 0, 1], 20, false);
+      duck.events.onAnimationComplete.add(function (e) {
         e.play('fly');
       }, this);
     });
 
-    this.nextEnemyAt = 0;
-    this.enemyDelay = DuckbumpGame.SPAWN_ENEMY_DELAY;
+    this.nextDuckAt = 0;
+    this.duckDelay = DuckbumpGame.SPAWN_ENEMY_DELAY;
 
   },
 
-  setupBullets: function () {
-    this.bulletPool = this.add.group();
-    this.bulletPool.enableBody = true;
-    this.bulletPool.physicsBodyType = Phaser.Physics.ARCADE;
-    this.bulletPool.createMultiple(200, 'bullet');
-    this.bulletPool.setAll('anchor.x', 0.5);
-    this.bulletPool.setAll('anchor.y', 0.5);
-    this.bulletPool.setAll('outOfBoundsKill', true);
-    this.bulletPool.setAll('checkWorldBounds', true);
-    this.bulletPool.forEach(function (bullet) {
-      bullet.animations.add('twirl', [0, 1, 0, 1], 15, true);
+  setupWhirlies: function () {
+    this.whirliePool = this.add.group();
+    this.whirliePool.enableBody = true;
+    this.whirliePool.physicsBodyType = Phaser.Physics.ARCADE;
+    this.whirliePool.createMultiple(200, 'whirlie');
+    this.whirliePool.setAll('anchor.x', 0.5);
+    this.whirliePool.setAll('anchor.y', 0.5);
+    this.whirliePool.setAll('outOfBoundsKill', true);
+    this.whirliePool.setAll('checkWorldBounds', true);
+    this.whirliePool.forEach(function (whirlie) {
+      whirlie.animations.add('twirl', [0, 1, 0, 1], 15, true);
     }, this);
     this.nextShotAt = 0;
     this.shotDelay = DuckbumpGame.SHOT_DELAY;
@@ -141,20 +137,20 @@ DuckbumpGame.Game.prototype = {
 
   checkCollisions: function () {
     this.physics.arcade.overlap(
-      this.bulletPool, this.enemyPool, this.enemyHit, null, this
+      this.whirliePool, this.dreenDuckPool, this.duckHit, null, this
       );
     this.physics.arcade.overlap(
-      this.player, this.enemyPool, this.playerHit, null, this
+      this.player, this.dreenDuckPool, this.playerHit, null, this
       );
   },
 
   spawnEnemies: function () {
-    if (this.nextEnemyAt < this.time.now && this.enemyPool.countDead() > 0) {
-      this.nextEnemyAt = this.time.now + this.enemyDelay;
-      var enemy = this.enemyPool.getFirstExists(false);
-      enemy.reset(0, this.rnd.integerInRange(0, this.game.height / 3), 0, DuckbumpGame.ENEMY_HEALTH);
-      enemy.body.velocity.x = this.rnd.integerInRange(DuckbumpGame.ENEMY_MAX_X_VELOCITY, DuckbumpGame.ENEMY_MIN_X_VELOCITY);
-      enemy.play('fly');
+    if (this.nextDuckAt < this.time.now && this.dreenDuckPool.countDead() > 0) {
+      this.nextDuckAt = this.time.now + this.duckDelay;
+      var duck = this.dreenDuckPool.getFirstExists(false);
+      duck.reset(0, this.rnd.integerInRange(0, this.game.height / 3), 0, DuckbumpGame.ENEMY_HEALTH);
+      duck.body.velocity.x = this.rnd.integerInRange(DuckbumpGame.ENEMY_MAX_X_VELOCITY, DuckbumpGame.ENEMY_MIN_X_VELOCITY);
+      duck.play('fly');
     }
   },
 
@@ -192,16 +188,16 @@ processDelayedEffects: function () {
     // this.game.debug.body(this.enemy);
   },
 
-  enemyHit: function (bullet, enemy) {
-    bullet.kill();
-    this.damageEnemy(enemy, DuckbumpGame.BULLET_DAMAGE);
+  duckHit: function (whirlie, duck) {
+    whirlie.kill();
+    this.damageDuck(duck, DuckbumpGame.BULLET_DAMAGE);
   },
 
-  playerHit: function (player, enemy) {
+  playerHit: function (player, duck) {
     if (this.ghostUntil && this.ghostUntil > this.time.now) {
       return;
     }
-    this.damageEnemy(enemy, DuckbumpGame.CRASH_DAMAGE);
+    this.damageDuck(duck, DuckbumpGame.CRASH_DAMAGE);
     var life = this.lives.getFirstAlive();
     if (life !== null) {
       life.kill();
@@ -213,13 +209,13 @@ processDelayedEffects: function () {
     }
   },
 
-  damageEnemy: function (enemy, damage) {
-    enemy.damage(damage);
-    if (enemy.alive) {
-      enemy.play('hit');
+  damageDuck: function (duck, damage) {
+    duck.damage(damage);
+    if (duck.alive) {
+      duck.play('hit');
     } else {
-      this.explode(enemy);
-      this.addToScore(enemy.reward);
+      this.explode(duck);
+      this.addToScore(duck.reward);
     }
   },
 
@@ -245,17 +241,17 @@ processDelayedEffects: function () {
       return;
     }
 
-    if (this.bulletPool.countDead() === 0) {
+    if (this.whirliePool.countDead() === 0) {
       return;
     }
     // for (var i = 0; i < 5; i++) {
-    //   var bullet = this.bulletPool.getFirstExists(false);
+    //   var bullet = this.whirliePool.getFirstExists(false);
     //   // spawn left bullet slightly left off center
     //   bullet.reset(this.player.x - (10 + i * 6), this.player.y - 20);
     //   // the left bullets spread from -95 degrees to -135 degrees
     //   this.physics.arcade.velocityFromAngle(-95 - i * 10, DuckbumpGame.BULLET_VELOCITY, bullet.body.velocity);
 
-    //   bullet = this.bulletPool.getFirstExists(false);
+    //   bullet = this.whirliePool.getFirstExists(false);
     //   // spawn right bullet slightly right off center
     //   bullet.reset(this.player.x + (10 + i * 6), this.player.y - 20);
     //   // the right bullets spread from -85 degrees to -45
@@ -263,11 +259,11 @@ processDelayedEffects: function () {
 
     //   bullet.play('twirl');
     // }
-    var bullet = this.bulletPool.getFirstExists(false);
+    var whirlie = this.whirliePool.getFirstExists(false);
     this.nextShotAt = this.time.now + this.shotDelay;
-    bullet.reset(this.player.x, this.player.y - 20);
-    bullet.body.velocity.y = -DuckbumpGame.BULLET_VELOCITY;
-    bullet.play('twirl');
+    whirlie.reset(this.player.x, this.player.y - 20);
+    whirlie.body.velocity.y = -DuckbumpGame.BULLET_VELOCITY;
+    whirlie.play('twirl');
 
   },
 
