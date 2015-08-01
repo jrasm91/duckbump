@@ -5,12 +5,10 @@ DuckbumpGame.Game = function (game) {
 DuckbumpGame.Game.prototype = {
   preload: function () {
     this.load.image('sea', 'assets/sea.png');
-    // this.load.image('bullet', 'assets/bullet.png');
     this.load.spritesheet('bullet', 'img/whirlie_sprite.png', 14, 24);
 
     this.load.spritesheet('greenEnemy', 'img/green_sprite.png', 48, 24, 2);
     this.load.spritesheet('explosion', 'assets/explosion.png', 32, 32);
-    // this.load.spritesheet('player', 'assets/player.png', 64, 64);
     this.load.image('player', 'img/DuckBumpJones.png')
   },
 
@@ -23,6 +21,8 @@ DuckbumpGame.Game.prototype = {
     this.setupText();
     this.setupPlayerIcons();
     this.cursors = this.input.keyboard.createCursorKeys();
+    this.shootKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    this.shootKey.onDown.add(this.fire, this);
   },
 
   setupBackground: function () {
@@ -112,7 +112,7 @@ DuckbumpGame.Game.prototype = {
         fill: '#fff',
         align: 'center'
       }
-    );
+      );
     this.instructions.anchor.setTo(0.5, 0.5);
     this.instExpire = this.time.now + DuckbumpGame.INSTRUCTION_EXPIRE;
     this.score = 0;
@@ -122,7 +122,7 @@ DuckbumpGame.Game.prototype = {
         fill: '#fff',
         align: 'center'
       }
-    );
+      );
     this.scoreText.anchor.setTo(0.5, 0.5);
   },
 
@@ -136,10 +136,10 @@ DuckbumpGame.Game.prototype = {
   checkCollisions: function () {
     this.physics.arcade.overlap(
       this.bulletPool, this.enemyPool, this.enemyHit, null, this
-    );
+      );
     this.physics.arcade.overlap(
       this.player, this.enemyPool, this.playerHit, null, this
-    );
+      );
   },
 
   spawnEnemies: function () {
@@ -156,36 +156,27 @@ DuckbumpGame.Game.prototype = {
     this.player.body.velocity.x = 0;
     this.player.body.velocity.y = 0;
 
-    if (this.cursors.left.isDown) {
+    if (this.cursors.left.isDown || this.input.keyboard.isDown(Phaser.Keyboard.A)) {
       this.player.body.velocity.x = -this.player.speed;
-    } else if (this.cursors.right.isDown) {
+    } else if (this.cursors.right.isDown || this.input.keyboard.isDown(Phaser.Keyboard.D)) {
       this.player.body.velocity.x = this.player.speed;
     }
 
-    if (this.cursors.up.isDown) {
-      this.player.body.velocity.y = -this.player.speed;
-    } else if (this.cursors.down.isDown) {
-      this.player.body.velocity.y = this.player.speed;
-    }
-
-    if (this.input.activePointer.isDown &&
-      this.physics.arcade.distanceToPointer(this.player) > 15) {
-      this.physics.arcade.moveToPointer(this.player, this.player.speed);
-    }
-
-    if (this.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) ||
+    if (this.input.keyboard.isDown(Phaser.Keyboard.Z) ||
+      this.cursors.up.isDown ||
+      this.input.keyboard.isDown(Phaser.Keyboard.W) ||
       this.input.activePointer.isDown) {
       this.fire();
-    }
-  },
+  }
+},
 
-  processDelayedEffects: function () {
-    if (this.instructions.exists && this.time.now > this.instExpire) {
-      this.instructions.destroy();
-    }
+processDelayedEffects: function () {
+  if (this.instructions.exists && this.time.now > this.instExpire) {
+    this.instructions.destroy();
+  }
 
-    if (this.ghostUntil && this.ghostUntil < this.time.now) {
-      this.ghostUntil = null;
+  if (this.ghostUntil && this.ghostUntil < this.time.now) {
+    this.ghostUntil = null;
       // this.player.play('fly');
     }
   },
@@ -263,7 +254,7 @@ DuckbumpGame.Game.prototype = {
     //   bullet.reset(this.player.x + (10 + i * 6), this.player.y - 20);
     //   // the right bullets spread from -85 degrees to -45
     //   this.physics.arcade.velocityFromAngle(-85 + i * 10, DuckbumpGame.BULLET_VELOCITY, bullet.body.velocity);
-      
+    
     //   bullet.play('twirl');
     // }
     var bullet = this.bulletPool.getFirstExists(false);
