@@ -244,6 +244,7 @@ processDelayedEffects: function () {
     if (this.whirliePool.countDead() === 0) {
       return;
     }
+    
     // for (var i = 0; i < 5; i++) {
     //   var bullet = this.whirliePool.getFirstExists(false);
     //   // spawn left bullet slightly left off center
