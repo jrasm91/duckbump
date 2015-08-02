@@ -234,7 +234,7 @@ DuckbumpGame.Game.prototype = {
     } else {
       this.explode(duck);
       this.addToScore(duck.reward);
-      this.addWhirlies(2);
+      this.addToWhirliesLeft(2);
     }
   },
 
@@ -243,7 +243,7 @@ DuckbumpGame.Game.prototype = {
     this.scoreText.text = this.score;
   },
 
-  addWhirlies: function(amount) {
+  addToWhirliesLeft: function(amount) {
     this.whirliesLeft += amount;
     if (this.whirliesLeft < 0) {
       this.whirliesLeft = 0;
@@ -291,7 +291,7 @@ DuckbumpGame.Game.prototype = {
     whirlie.reset(this.player.x, this.player.y - 20);
     whirlie.body.velocity.y = -DuckbumpGame.BULLET_VELOCITY;
     whirlie.play('twirl');
-    this.addWhirlies(-1);
+    this.addToWhirliesLeft(-1);
   },
 
   quitGame: function(pointer) {
