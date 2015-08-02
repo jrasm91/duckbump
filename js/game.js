@@ -16,20 +16,21 @@ DuckbumpGame.Game.prototype = {
 
   create: function() {
     this.setupBackground();
-    this.setupPlayer();
     this.setupDucks();
     this.setupWhirlies();
     this.setupExplosions();
     this.setupText();
     this.setupPlayerIcons();
+    this.setupPlayer();
     this.setupInput();
   },
 
-  reder: function(){
-    // game.debug.renderRectangle(this.player.body);
+  render: function() {
+    // this.game.debug.body(this.player);
+    // this.game.debug.body(this.cookedDuckPool);
   },
 
-  setupInput: function(){
+  setupInput: function() {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.shootKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     this.shootKey.onDown.add(this.fire, this);
@@ -50,7 +51,7 @@ DuckbumpGame.Game.prototype = {
     this.physics.enable(this.player, Phaser.Physics.ARCADE);
     this.player.body.collideWorldBounds = true;
     this.player.speed = DuckbumpGame.PLAYER_SPEED;
-    this.player.body.setSize(20, 20, 0, -5);
+    // this.player.body.setSize(20, 20, 0, -5);
   },
 
   setupDucks: function() {
@@ -62,7 +63,6 @@ DuckbumpGame.Game.prototype = {
     this.dreenDuckPool.setAll('anchor.y', 0.5);
     this.dreenDuckPool.setAll('outOfBoundsKill', true);
     this.dreenDuckPool.setAll('checkWorldBounds', true);
-    this.dreenDuckPool.setAll('reward', DuckbumpGame.ENEMY_REWARD, false, false, 0, true);
     this.dreenDuckPool.forEach(function(duck) {
       duck.animations.add('fly', [0, 2, 3, 1], 5, true);
       duck.events.onAnimationComplete.add(function(e) {
@@ -84,12 +84,11 @@ DuckbumpGame.Game.prototype = {
     this.cookedDuckPool.setAll('reward', DuckbumpGame.ENEMY_REWARD, false, false, 0, true);
   },
 
-
   setupWhirlies: function() {
     this.whirliePool = this.add.group();
     this.whirliePool.enableBody = true;
     this.whirliePool.physicsBodyType = Phaser.Physics.ARCADE;
-    this.whirliePool.createMultiple(200, 'whirlie');
+    this.whirliePool.createMultiple(50, 'whirlie');
     this.whirliePool.setAll('anchor.x', 0.5);
     this.whirliePool.setAll('anchor.y', 0.5);
     this.whirliePool.setAll('outOfBoundsKill', true);
@@ -167,6 +166,7 @@ DuckbumpGame.Game.prototype = {
 
   checkCollisions: function() {
     this.physics.arcade.overlap(this.whirliePool, this.dreenDuckPool, this.duckHit, null, this);
+    this.physics.arcade.overlap(this.cookedDuckPool, this.player, this.playerEatDuck, null, this);
   },
 
   spawnEnemies: function() {
@@ -177,9 +177,9 @@ DuckbumpGame.Game.prototype = {
       var py = this.rnd.integerInRange(30, this.game.height / 3 + 30);
       duck.reset(px, py, 0, DuckbumpGame.ENEMY_HEALTH);
       var scale = Math.abs(duck.scale.x);
-      duck.scale.x = (px > 0? -1 : 1) * scale;
+      duck.scale.x = (px > 0 ? -1 : 1) * scale;
       var velocity = this.rnd.integerInRange(DuckbumpGame.ENEMY_MAX_X_VELOCITY, DuckbumpGame.ENEMY_MIN_X_VELOCITY);
-      duck.body.velocity.x = (px > 0? -1: 1) * velocity;
+      duck.body.velocity.x = (px > 0 ? -1 : 1) * velocity;
       duck.play('fly');
     }
   },
@@ -209,7 +209,7 @@ DuckbumpGame.Game.prototype = {
   },
 
   duckHit: function(whirlie, duck) {
-    duck.kill();
+    duck.destroy();
 
     if (this.cookedDuckPool.countDead() === 0 || this.explosionPool.countDead() === 0) {
       return;
@@ -220,16 +220,34 @@ DuckbumpGame.Game.prototype = {
     explosion.reset(duck.x, duck.y);
     cookedDuck.reset(duck.x, duck.y);
 
-    var px = duck.x + (duck.scale.x < 0? -1 : 1) * (this.game.height - duck.y)/4;
+    var px = duck.x + (duck.scale.x < 0 ? -1 : 1) * (this.game.height - duck.y) / 4;
     var py = this.game.height - this.rnd.integerInRange(0, 30) - 15;
 
-    this.add.tween(cookedDuck).to( { x: px, y: py }, 2000, Phaser.Easing.Bounce.Out, true);
-    this.add.tween(explosion).to( { x: px, y:  py }, 2000, Phaser.Easing.Bounce.Out, true);
+    this.add.tween(cookedDuck).to({
+      x: px,
+      y: py
+    }, DuckbumpGame.COOKED_FALL_DURATION, Phaser.Easing.Bounce.Out, true);
+    this.add.tween(explosion).to({
+      x: px,
+      y: py
+    }, DuckbumpGame.COOKED_FALL_DURATION, Phaser.Easing.Bounce.Out, true);
+
+    cookedDuck.delayedDeathAt = this.time.now + DuckbumpGame.COOKED_DEATH_DELAY;
+    this.game.time.events.add(DuckbumpGame.COOKED_DEATH_DELAY, function() {
+      if (this.time.now >= cookedDuck.delayedDeathAt) {
+        cookedDuck.kill();
+      }
+    }, this);
 
     explosion.play('boom', 15, false, true);
 
-    this.addToScore(duck.reward);
+    // this.addToScore(duck.reward);
     this.addToWhirliesLeft(2);
+  },
+
+  playerEatDuck: function(player, cookedDuck) {
+    cookedDuck.kill();
+    this.addToScore(cookedDuck.reward);
   },
 
   addToScore: function(score) {
