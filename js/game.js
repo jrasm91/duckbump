@@ -8,7 +8,7 @@ DuckbumpGame.Game.prototype = {
     this.load.spritesheet('whirlie', 'img/whirlie_sprite.png', 14, 24);
     this.load.spritesheet('greenDuck', 'img/green_sprite.png', 48, 24, 2);
     // this.load.spritesheet('goldDuck', 'img/gold_sprite.png', 48, 24, 2);
-    this.load.spritesheet('explosion', 'assets/explosion.png', 32, 32);
+    this.load.spritesheet('explosion', 'img/explosion.png', 32, 32);
     this.load.image('player', 'img/DuckBumpJones.png')
   },
 
