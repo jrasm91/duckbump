@@ -209,7 +209,7 @@ DuckbumpGame.Game.prototype = {
   },
 
   duckHit: function(whirlie, duck) {
-    duck.destroy();
+    duck.kill();
 
     if (this.cookedDuckPool.countDead() === 0 || this.explosionPool.countDead() === 0) {
       return;
