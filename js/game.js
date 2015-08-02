@@ -6,8 +6,10 @@ DuckbumpGame.Game.prototype = {
   preload: function() {
     this.load.image('background', 'img/DuckBumpBackground.jpg');
     this.load.spritesheet('whirlie', 'img/whirlie_sprite.png', 14, 24);
-    this.load.spritesheet('greenDuck', 'img/green_sprite.png', 48, 24, 2);
+    this.load.spritesheet('greenDuck', 'img/green_sprite.png', 48, 24);
+    this.load.image('cookedDuck', 'img/CookedDuck.png', 48, 24);
     // this.load.spritesheet('goldDuck', 'img/gold_sprite.png', 48, 24, 2);
+
     this.load.spritesheet('explosion', 'img/explosion.png', 32, 32);
     this.load.image('player', 'img/DuckBumpJones.png')
   },
@@ -20,6 +22,14 @@ DuckbumpGame.Game.prototype = {
     this.setupExplosions();
     this.setupText();
     this.setupPlayerIcons();
+    this.setupInput();
+  },
+
+  reder: function(){
+    // game.debug.renderRectangle(this.player.body);
+  },
+
+  setupInput: function(){
     this.cursors = this.input.keyboard.createCursorKeys();
     this.shootKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     this.shootKey.onDown.add(this.fire, this);
@@ -36,7 +46,6 @@ DuckbumpGame.Game.prototype = {
     this.player.anchor.setTo(0.5, 0.5);
     this.player.scale.setTo(.8, .8);
     // this.player.animations.add('fly', [0, 1, 2], 20, true);
-    // this.player.animations.add('ghost', [3, 0, 3, 1], 20, true);
     // this.player.play('fly');
     this.physics.enable(this.player, Phaser.Physics.ARCADE);
     this.player.body.collideWorldBounds = true;
@@ -55,8 +64,7 @@ DuckbumpGame.Game.prototype = {
     this.dreenDuckPool.setAll('checkWorldBounds', true);
     this.dreenDuckPool.setAll('reward', DuckbumpGame.ENEMY_REWARD, false, false, 0, true);
     this.dreenDuckPool.forEach(function(duck) {
-      duck.animations.add('fly', [0, 1, 0, 1], 20, true);
-      duck.animations.add('hit', [0, 1, 0, 1], 20, false);
+      duck.animations.add('fly', [0, 2, 3, 1], 5, true);
       duck.events.onAnimationComplete.add(function(e) {
         e.play('fly');
       }, this);
@@ -65,7 +73,17 @@ DuckbumpGame.Game.prototype = {
     this.nextDuckAt = 0;
     this.duckDelay = DuckbumpGame.SPAWN_ENEMY_DELAY;
 
+    this.cookedDuckPool = this.add.group();
+    this.cookedDuckPool.enableBody = true;
+    this.cookedDuckPool.physicsBodyType = Phaser.Physics.ARCADE;
+    this.cookedDuckPool.createMultiple(50, 'cookedDuck');
+    this.cookedDuckPool.setAll('anchor.x', 0.5);
+    this.cookedDuckPool.setAll('anchor.y', 0.5);
+    this.cookedDuckPool.setAll('outOfBoundsKill', true);
+    this.cookedDuckPool.setAll('checkWorldBounds', true);
+    this.cookedDuckPool.setAll('reward', DuckbumpGame.ENEMY_REWARD, false, false, 0, true);
   },
+
 
   setupWhirlies: function() {
     this.whirliePool = this.add.group();
@@ -99,6 +117,8 @@ DuckbumpGame.Game.prototype = {
     this.explosionPool.createMultiple(100, 'explosion');
     this.explosionPool.setAll('anchor.x', 0.5);
     this.explosionPool.setAll('anchor.y', 0.5);
+    this.explosionPool.setAll('scale.x', 2);
+    this.explosionPool.setAll('scale.y', 2);
     this.explosionPool.forEach(function(explosion) {
       explosion.animations.add('boom');
     });
@@ -146,12 +166,7 @@ DuckbumpGame.Game.prototype = {
   },
 
   checkCollisions: function() {
-    this.physics.arcade.overlap(
-      this.whirliePool, this.dreenDuckPool, this.duckHit, null, this
-    );
-    this.physics.arcade.overlap(
-      this.player, this.dreenDuckPool, this.playerHit, null, this
-    );
+    this.physics.arcade.overlap(this.whirliePool, this.dreenDuckPool, this.duckHit, null, this);
   },
 
   spawnEnemies: function() {
@@ -159,15 +174,12 @@ DuckbumpGame.Game.prototype = {
       this.nextDuckAt = this.time.now + this.duckDelay;
       var duck = this.dreenDuckPool.getFirstExists(false);
       var px = this.rnd.integerInRange(0, 1) * this.game.width;
-      var py = this.rnd.integerInRange(0, this.game.height / 3);
+      var py = this.rnd.integerInRange(30, this.game.height / 3 + 30);
       duck.reset(px, py, 0, DuckbumpGame.ENEMY_HEALTH);
-      duck.scale.x *= duck.scale.x < 0 ? -1 : 1;
+      var scale = Math.abs(duck.scale.x);
+      duck.scale.x = (px > 0? -1 : 1) * scale;
       var velocity = this.rnd.integerInRange(DuckbumpGame.ENEMY_MAX_X_VELOCITY, DuckbumpGame.ENEMY_MIN_X_VELOCITY);
-      if (px > 0) {
-        velocity *= -1;
-        duck.scale.x *= -1;
-      }
-      duck.body.velocity.x = velocity;
+      duck.body.velocity.x = (px > 0? -1: 1) * velocity;
       duck.play('fly');
     }
   },
@@ -194,48 +206,30 @@ DuckbumpGame.Game.prototype = {
     if (this.instructions.exists && this.time.now > this.instExpire) {
       this.instructions.destroy();
     }
-
-    if (this.ghostUntil && this.ghostUntil < this.time.now) {
-      this.ghostUntil = null;
-      // this.player.play('fly');
-    }
-  },
-
-  render: function() {
-    // this.game.debug.body(this.player);
-    // this.game.debug.body(this.enemy);
   },
 
   duckHit: function(whirlie, duck) {
-    // whirlie.kill();
-    this.damageDuck(duck, DuckbumpGame.BULLET_DAMAGE);
-  },
+    duck.kill();
 
-  playerHit: function(player, duck) {
-    if (this.ghostUntil && this.ghostUntil > this.time.now) {
+    if (this.cookedDuckPool.countDead() === 0 || this.explosionPool.countDead() === 0) {
       return;
     }
-    this.damageDuck(duck, DuckbumpGame.CRASH_DAMAGE);
-    var life = this.lives.getFirstAlive();
-    if (life !== null) {
-      life.kill();
-      this.ghostUntil = this.time.now + DuckbumpGame.PLAYER_GHOST_TIME;
-      // this.player.play('ghost');
-    } else {
-      this.explode(player);
-      player.kill();
-    }
-  },
 
-  damageDuck: function(duck, damage) {
-    duck.damage(damage);
-    if (duck.alive) {
-      duck.play('hit');
-    } else {
-      this.explode(duck);
-      this.addToScore(duck.reward);
-      this.addToWhirliesLeft(2);
-    }
+    var explosion = this.explosionPool.getFirstExists(false);
+    var cookedDuck = this.cookedDuckPool.getFirstExists(false);
+    explosion.reset(duck.x, duck.y);
+    cookedDuck.reset(duck.x, duck.y);
+
+    var px = duck.x + (duck.scale.x < 0? -1 : 1) * (this.game.height - duck.y)/4;
+    var py = this.game.height - this.rnd.integerInRange(0, 30) - 15;
+
+    this.add.tween(cookedDuck).to( { x: px, y: py }, 2000, Phaser.Easing.Bounce.Out, true);
+    this.add.tween(explosion).to( { x: px, y:  py }, 2000, Phaser.Easing.Bounce.Out, true);
+
+    explosion.play('boom', 15, false, true);
+
+    this.addToScore(duck.reward);
+    this.addToWhirliesLeft(2);
   },
 
   addToScore: function(score) {
@@ -249,18 +243,6 @@ DuckbumpGame.Game.prototype = {
       this.whirliesLeft = 0;
     }
     this.whirliesText.text = this.whirliesLeft;
-  },
-
-  explode: function(sprite) {
-    if (this.explosionPool.countDead() === 0) {
-      return;
-    }
-    var explosion = this.explosionPool.getFirstExists(false);
-    explosion.reset(sprite.x, sprite.y);
-    explosion.play('boom', 15, false, true);
-    // add the original sprite's velocity to the explosion
-    explosion.body.velocity.x = sprite.body.velocity.x;
-    explosion.body.velocity.y = sprite.body.velocity.y;
   },
 
   fire: function() {
