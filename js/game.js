@@ -1,9 +1,9 @@
-DuckbumpGame.Game = function (game) {
+DuckbumpGame.Game = function(game) {
 
 };
 
 DuckbumpGame.Game.prototype = {
-  preload: function () {
+  preload: function() {
     this.load.image('background', 'img/DuckBumpBackground.jpg');
     this.load.spritesheet('whirlie', 'img/whirlie_sprite.png', 14, 24);
     this.load.spritesheet('greenDuck', 'img/green_sprite.png', 48, 24, 2);
@@ -12,7 +12,7 @@ DuckbumpGame.Game.prototype = {
     this.load.image('player', 'img/DuckBumpJones.png')
   },
 
-  create: function () {
+  create: function() {
     this.setupBackground();
     this.setupPlayer();
     this.setupDucks();
@@ -25,13 +25,13 @@ DuckbumpGame.Game.prototype = {
     this.shootKey.onDown.add(this.fire, this);
   },
 
-  setupBackground: function () {
+  setupBackground: function() {
     this.background = this.add.sprite(0, 0, 'background');
     this.background.width = this.game.width;
     this.background.height = this.game.height;
   },
 
-  setupPlayer: function () {
+  setupPlayer: function() {
     this.player = this.add.sprite(this.game.width / 2, this.game.height - 50, 'player');
     this.player.anchor.setTo(0.5, 0.5);
     this.player.scale.setTo(.8, .8);
@@ -44,7 +44,7 @@ DuckbumpGame.Game.prototype = {
     this.player.body.setSize(20, 20, 0, -5);
   },
 
-  setupDucks: function () {
+  setupDucks: function() {
     this.dreenDuckPool = this.add.group();
     this.dreenDuckPool.enableBody = true;
     this.dreenDuckPool.physicsBodyType = Phaser.Physics.ARCADE;
@@ -54,10 +54,10 @@ DuckbumpGame.Game.prototype = {
     this.dreenDuckPool.setAll('outOfBoundsKill', true);
     this.dreenDuckPool.setAll('checkWorldBounds', true);
     this.dreenDuckPool.setAll('reward', DuckbumpGame.ENEMY_REWARD, false, false, 0, true);
-    this.dreenDuckPool.forEach(function (duck) {
+    this.dreenDuckPool.forEach(function(duck) {
       duck.animations.add('fly', [0, 1, 0, 1], 20, true);
       duck.animations.add('hit', [0, 1, 0, 1], 20, false);
-      duck.events.onAnimationComplete.add(function (e) {
+      duck.events.onAnimationComplete.add(function(e) {
         e.play('fly');
       }, this);
     });
@@ -67,7 +67,7 @@ DuckbumpGame.Game.prototype = {
 
   },
 
-  setupWhirlies: function () {
+  setupWhirlies: function() {
     this.whirliePool = this.add.group();
     this.whirliePool.enableBody = true;
     this.whirliePool.physicsBodyType = Phaser.Physics.ARCADE;
@@ -76,26 +76,35 @@ DuckbumpGame.Game.prototype = {
     this.whirliePool.setAll('anchor.y', 0.5);
     this.whirliePool.setAll('outOfBoundsKill', true);
     this.whirliePool.setAll('checkWorldBounds', true);
-    this.whirliePool.forEach(function (whirlie) {
+    this.whirliePool.forEach(function(whirlie) {
       whirlie.animations.add('twirl', [0, 1, 0, 1], 15, true);
     }, this);
     this.nextShotAt = 0;
     this.shotDelay = DuckbumpGame.SHOT_DELAY;
+    this.whirliesLeft = 10;
+    this.whirliesText = this.add.text(
+      30, 30, '' + this.whirliesLeft, {
+        font: '20px pixalFont',
+        fill: '#7D4513',
+        align: 'center'
+      }
+    );
+    this.whirliesText.anchor.setTo(0.5, 0.5);
   },
 
-  setupExplosions: function () {
+  setupExplosions: function() {
     this.explosionPool = this.add.group();
     this.explosionPool.enableBody = true;
     this.explosionPool.physicsBodyType = Phaser.Physics.ARCADE;
     this.explosionPool.createMultiple(100, 'explosion');
     this.explosionPool.setAll('anchor.x', 0.5);
     this.explosionPool.setAll('anchor.y', 0.5);
-    this.explosionPool.forEach(function (explosion) {
+    this.explosionPool.forEach(function(explosion) {
       explosion.animations.add('boom');
     });
   },
 
-  setupPlayerIcons: function () {
+  setupPlayerIcons: function() {
     this.lives = this.add.group();
     // calculate location of first life icon
     var firstLifeIconX = this.game.width - 10 - (DuckbumpGame.PLAYER_EXTRA_LIVES * 20);
@@ -106,7 +115,7 @@ DuckbumpGame.Game.prototype = {
     }
   },
 
-  setupText: function () {
+  setupText: function() {
     this.instructions = this.add.text(this.game.width / 2, this.game.height - 150,
       'Use Arrow Keys to Move, Press SPACE to Fire\n' +
       'Tapping/clicking does both', {
@@ -114,9 +123,9 @@ DuckbumpGame.Game.prototype = {
         fill: '#fff',
         align: 'center'
       }
-      );
+    );
     this.instructions.anchor.setTo(0.5, 0.5);
-    this.instExpire = this.time.now;//DuckbumpGame.INSTRUCTION_EXPIRE;
+    this.instExpire = this.time.now; //DuckbumpGame.INSTRUCTION_EXPIRE;
     this.score = 0;
     this.scoreText = this.add.text(
       this.game.width / 2, 30, '' + this.score, {
@@ -124,37 +133,46 @@ DuckbumpGame.Game.prototype = {
         fill: '#7D4513',
         align: 'center'
       }
-      );
+    );
     this.scoreText.anchor.setTo(0.5, 0.5);
+
   },
 
-  update: function () {
+  update: function() {
     this.checkCollisions();
     this.spawnEnemies();
     this.processPlayerInput();
     this.processDelayedEffects();
   },
 
-  checkCollisions: function () {
+  checkCollisions: function() {
     this.physics.arcade.overlap(
       this.whirliePool, this.dreenDuckPool, this.duckHit, null, this
-      );
+    );
     this.physics.arcade.overlap(
       this.player, this.dreenDuckPool, this.playerHit, null, this
-      );
+    );
   },
 
-  spawnEnemies: function () {
+  spawnEnemies: function() {
     if (this.nextDuckAt < this.time.now && this.dreenDuckPool.countDead() > 0) {
       this.nextDuckAt = this.time.now + this.duckDelay;
       var duck = this.dreenDuckPool.getFirstExists(false);
-      duck.reset(0, this.rnd.integerInRange(0, this.game.height / 3), 0, DuckbumpGame.ENEMY_HEALTH);
-      duck.body.velocity.x = this.rnd.integerInRange(DuckbumpGame.ENEMY_MAX_X_VELOCITY, DuckbumpGame.ENEMY_MIN_X_VELOCITY);
+      var px = this.rnd.integerInRange(0, 1) * this.game.width;
+      var py = this.rnd.integerInRange(0, this.game.height / 3);
+      duck.reset(px, py, 0, DuckbumpGame.ENEMY_HEALTH);
+      duck.scale.x *= duck.scale.x < 0 ? -1 : 1;
+      var velocity = this.rnd.integerInRange(DuckbumpGame.ENEMY_MAX_X_VELOCITY, DuckbumpGame.ENEMY_MIN_X_VELOCITY);
+      if (px > 0) {
+        velocity *= -1;
+        duck.scale.x *= -1;
+      }
+      duck.body.velocity.x = velocity;
       duck.play('fly');
     }
   },
 
-  processPlayerInput: function () {
+  processPlayerInput: function() {
     this.player.body.velocity.x = 0;
     this.player.body.velocity.y = 0;
 
@@ -169,31 +187,31 @@ DuckbumpGame.Game.prototype = {
       this.input.keyboard.isDown(Phaser.Keyboard.W) ||
       this.input.activePointer.isDown) {
       this.fire();
-  }
-},
+    }
+  },
 
-processDelayedEffects: function () {
-  if (this.instructions.exists && this.time.now > this.instExpire) {
-    this.instructions.destroy();
-  }
+  processDelayedEffects: function() {
+    if (this.instructions.exists && this.time.now > this.instExpire) {
+      this.instructions.destroy();
+    }
 
-  if (this.ghostUntil && this.ghostUntil < this.time.now) {
-    this.ghostUntil = null;
+    if (this.ghostUntil && this.ghostUntil < this.time.now) {
+      this.ghostUntil = null;
       // this.player.play('fly');
     }
   },
 
-  render: function () {
+  render: function() {
     // this.game.debug.body(this.player);
     // this.game.debug.body(this.enemy);
   },
 
-  duckHit: function (whirlie, duck) {
-    whirlie.kill();
+  duckHit: function(whirlie, duck) {
+    // whirlie.kill();
     this.damageDuck(duck, DuckbumpGame.BULLET_DAMAGE);
   },
 
-  playerHit: function (player, duck) {
+  playerHit: function(player, duck) {
     if (this.ghostUntil && this.ghostUntil > this.time.now) {
       return;
     }
@@ -209,22 +227,31 @@ processDelayedEffects: function () {
     }
   },
 
-  damageDuck: function (duck, damage) {
+  damageDuck: function(duck, damage) {
     duck.damage(damage);
     if (duck.alive) {
       duck.play('hit');
     } else {
       this.explode(duck);
       this.addToScore(duck.reward);
+      this.addWhirlies(2);
     }
   },
 
-  addToScore: function (score) {
+  addToScore: function(score) {
     this.score += score;
     this.scoreText.text = this.score;
   },
 
-  explode: function (sprite) {
+  addWhirlies: function(amount) {
+    this.whirliesLeft += amount;
+    if (this.whirliesLeft < 0) {
+      this.whirliesLeft = 0;
+    }
+    this.whirliesText.text = this.whirliesLeft;
+  },
+
+  explode: function(sprite) {
     if (this.explosionPool.countDead() === 0) {
       return;
     }
@@ -236,15 +263,14 @@ processDelayedEffects: function () {
     explosion.body.velocity.y = sprite.body.velocity.y;
   },
 
-  fire: function () {
-    if (!this.player.alive || this.nextShotAt > this.time.now) {
+  fire: function() {
+    if (!this.player.alive ||
+      this.nextShotAt > this.time.now ||
+      this.whirliesLeft <= 0 ||
+      this.whirliePool.countDead() === 0) {
       return;
     }
 
-    if (this.whirliePool.countDead() === 0) {
-      return;
-    }
-    
     // for (var i = 0; i < 5; i++) {
     //   var bullet = this.whirliePool.getFirstExists(false);
     //   // spawn left bullet slightly left off center
@@ -265,10 +291,10 @@ processDelayedEffects: function () {
     whirlie.reset(this.player.x, this.player.y - 20);
     whirlie.body.velocity.y = -DuckbumpGame.BULLET_VELOCITY;
     whirlie.play('twirl');
-
+    this.addWhirlies(-1);
   },
 
-  quitGame: function (pointer) {
+  quitGame: function(pointer) {
 
     //  Here you should destroy anything you no longer need.
     //  Stop music, delete sprites, purge caches, free resources, all that good stuff.
