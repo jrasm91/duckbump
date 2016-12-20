@@ -1,4 +1,3 @@
-duckbump
+DuckBump
 ========
-
-DuckBump Game
+Play at: https://duckbump.firebaseapp.com
